@@ -110,3 +110,4 @@ Para garantir total soberania dos seus dados:
 ## 📄 Licença
 
 Este projeto é de código aberto sob a licença [MIT](LICENSE).
+
