@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0d14">
+  <meta name="description" content="PWA utilitário offline-first para acompanhamento diário do protocolo de flexões de 12 semanas.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pushup 12S">
+
+  <title>Protocolo de Flexões · 12 Semanas</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER FIXO DE COMANDO -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <!-- SVG Tático Inline -->
+        <svg class="brand-icon" viewBox="0 0 512 512" fill="none">
+          <rect width="512" height="512" rx="100" fill="#141a24"/>
+          <path d="M120 340 L256 200 L392 340" stroke="#f59e0b" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M168 390 L256 300 L344 390" stroke="#38bdf8" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="256" cy="130" r="36" fill="#f59e0b"/>
+        </svg>
+        <span class="brand-title">Protocolo Push-Up</span>
+        <span class="brand-badge">12S</span>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="install-btn" id="installPwaBtn" style="display: none;" aria-label="Instalar Aplicativo" title="Instalar Aplicativo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Instalar</span>
+        </button>
+        <button type="button" class="icon-btn" id="openSettingsBtn" aria-label="Backup e Configurações" title="Backup e Configurações">
+          <!-- Ícone Engrenagem / Ajustes Inline -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Progresso Geral -->
+    <div class="global-progress-card">
+      <div class="progress-info">
+        <span>Progresso Geral</span>
+        <span class="progress-value mono" id="globalProgressLabel">0 de 36 sessões (0%)</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="globalProgressBar"></div>
+      </div>
+    </div>
+
+    <!-- Seletor Rápido de Semanas (S1 - S12) -->
+    <nav class="weeks-nav" id="weeksNav" aria-label="Seletor de Semanas">
+      <!-- Inserido dinamicamente via JS -->
+    </nav>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL (CARD DO TREINO DO DIA) -->
+  <main class="main-container">
+
+    <!-- Alerta Condicional de Coaching da Semana Anterior -->
+    <div id="coachingAlertContainer" style="display: none;"></div>
+
+    <!-- Seletor de Dias da Semana (Seg / Qua / Sex) -->
+    <nav class="days-nav" id="daysNav" aria-label="Seletor de Dias">
+      <!-- Gerado dinamicamente via JS -->
+    </nav>
+
+    <!-- Card Principal da Sessão -->
+    <article class="workout-card" id="workoutCard">
+      <!-- Header do Card -->
+      <div class="card-header">
+        <div class="workout-titles">
+          <span class="session-badge" id="sessionBadge">Semana 1 · Segunda-feira</span>
+          <h2 class="workout-title" id="workoutTitle">Força Inclinada e Negativas</h2>
+          <span class="session-focus" id="sessionFocus">Semana 1 · Base & Adaptação Neural</span>
+        </div>
+        <div class="status-indicator" id="statusIndicator">Pendente</div>
+      </div>
+
+      <!-- Contexto do Dia (Off / Pré-Boxe / Pós-Boxe) -->
+      <section class="context-section">
+        <span class="section-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Contexto Físico do Dia
+        </span>
+        <div class="context-selector" id="contextSelector">
+          <button type="button" class="context-btn active" data-context="off">Dia Off</button>
+          <button type="button" class="context-btn" data-context="pre_boxe">Pré-Boxe</button>
+          <button type="button" class="context-btn" data-context="pos_boxe">Pós-Boxe</button>
+        </div>
+      </section>
+
+      <!-- Referência Física de Apoio (S1 a S4) -->
+      <section class="physical-ref-block" id="physicalRefBlock" style="display: none;">
+        <div class="physical-ref-header">
+          <span class="section-label">Referência Física de Apoio</span>
+          <span class="ref-tag" id="physicalRefHeightTag">Apoio 50cm</span>
+        </div>
+        <input type="text" class="ref-input" id="physicalRefInput" placeholder="Ex: Sofá, Degrau 2, Banco..." maxlength="40">
+      </section>
+
+      <!-- Lista dos 3 Blocos de Exercícios -->
+      <section class="exercises-list" id="exercisesList">
+        <!-- Renderizado dinamicamente com checkboxes por série e AMRAP -->
+      </section>
+
+      <!-- Métricas de Coaching (Qualidade Técnica + RPE) -->
+      <section class="coaching-section">
+        <!-- Toggle Técnica -->
+        <div class="technique-toggle-container">
+          <span class="section-label">Qualidade Técnica</span>
+          <button type="button" class="technique-toggle-btn clean" id="techniqueBtn">
+            <span class="technique-label">Padrão Motor</span>
+            <span class="technique-pill" id="techniquePill">Execução Limpa</span>
+          </button>
+        </div>
+
+        <!-- RPE Esforço da Sessão -->
+        <div class="rpe-section">
+          <span class="section-label">Percepção de Esforço (RPE)</span>
+          <div class="rpe-buttons">
+            <button type="button" class="rpe-btn" data-rpe="easy">Fácil</button>
+            <button type="button" class="rpe-btn active" data-rpe="moderate">Na Medida</button>
+            <button type="button" class="rpe-btn" data-rpe="heavy">Pesado</button>
+          </div>
+        </div>
+
+        <!-- Botão Principal de Conclusão -->
+        <button type="button" class="complete-btn" id="completeWorkoutBtn">
+          Concluir Treino do Dia
+        </button>
+
+        <!-- Histórico e Undo se salvo -->
+        <div class="session-saved-meta" id="sessionSavedMeta"></div>
+      </section>
+    </article>
+
+  </main>
+
+  <!-- CRONÔMETRO INTEGRADO (BOTTOM SHEET / MINI-PLAYER RECOLHÍVEL) -->
+  <aside class="timer-dock" id="timerDock" aria-label="Cronômetro de Treino">
+    <!-- Puxador Tátil da Bottom Sheet -->
+    <div class="timer-handle-bar" id="timerSheetHandle" role="button" aria-label="Expandir ou recolher cronômetro">
+      <span class="handle-pill"></span>
+    </div>
+
+    <!-- Mini-Player Bar (Compacto durante os exercícios) -->
+    <div class="timer-mini-bar" id="timerMiniBar">
+      <div class="mini-left" id="timerMiniExpandTrigger" role="button" aria-label="Abrir controles do cronômetro">
+        <span class="mini-mode-badge" id="miniModeBadge">REST</span>
+        <span class="mini-digits mono" id="miniDigits">01:00</span>
+        <span class="mini-label" id="miniSublabel">Descanso</span>
+      </div>
+      <div class="mini-right">
+        <button type="button" class="mini-play-btn" id="miniPlayBtn" aria-label="Iniciar ou Pausar">
+          <svg id="miniPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </button>
+        <button type="button" class="mini-toggle-btn" id="miniChevronBtn" aria-label="Expandir controles">
+          <svg id="miniChevronIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo Expandido (Controles Completos) -->
+    <div class="timer-expanded-content" id="timerExpandedContent">
+      <!-- Abas dos Modos de Timer -->
+      <div class="timer-modes-nav">
+        <button type="button" class="timer-mode-btn active" data-mode="rest">Descanso</button>
+        <button type="button" class="timer-mode-btn" data-mode="iso">Isometria</button>
+        <button type="button" class="timer-mode-btn" data-mode="emom">EMOM</button>
+      </div>
+
+      <!-- Status do Wake Lock & Áudio -->
+      <div class="timer-status-row">
+        <span class="status-pill" id="wakeLockStatus">
+          <span class="status-dot"></span>
+          <span>Tela Ativa (Wake Lock)</span>
+        </span>
+        <span class="status-pill active" title="Bips nativos sintetizados via Web Audio API">
+          <span>Áudio Nativo</span>
+        </span>
+      </div>
+
+      <!-- Display Central do Cronômetro -->
+      <div class="timer-display-box">
+        <span class="timer-digits mono" id="timerDigits">01:00</span>
+        <span class="timer-sublabel" id="timerSublabel">Descanso</span>
+      </div>
+
+      <!-- Seletor de Presets Rápidos -->
+      <div class="timer-presets" id="timerPresetsContainer">
+        <!-- Inserido dinamicamente conforme modo (60s, 90s, 120s / 20s-60s / 8m-12m) -->
+      </div>
+
+      <!-- Ações do Timer -->
+      <div class="timer-actions">
+        <button type="button" class="timer-ctl-btn secondary" id="timerResetBtn">Resetar</button>
+        <button type="button" class="timer-ctl-btn primary" id="timerMainBtn">Iniciar</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MODAL DE BACKUP E CONFIGURAÇÕES -->
+  <div class="modal-backdrop" id="settingsModal" aria-hidden="true">
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Gerenciamento & Backup</h3>
+        <button type="button" class="icon-btn" id="closeSettingsBtn" aria-label="Fechar modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Resumo de Estatísticas -->
+        <div class="stats-summary">
+          <div>
+            <div class="stat-item-val mono" id="statCompletedCount">0/36</div>
+            <div class="stat-item-lbl">Treinos Feitos</div>
+          </div>
+          <div>
+            <div class="stat-item-val mono" id="statAmrapCount">0/3</div>
+            <div class="stat-item-lbl">AMRAPs Concluídos</div>
+          </div>
+          <div>
+            <div class="stat-item-val mono">100%</div>
+            <div class="stat-item-lbl">Offline PWA</div>
+          </div>
+        </div>
+
+        <!-- Botões de Backup -->
+        <div class="backup-btn-grid">
+          <button type="button" class="modal-action-btn" id="exportBackupBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar JSON
+          </button>
+          <button type="button" class="modal-action-btn" id="importBackupBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importar JSON
+          </button>
+        </div>
+        <input type="file" id="importFileInput" accept=".json" class="sr-only">
+
+        <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 4px 0;">
+
+        <!-- Botão Perigoso: Reset -->
+        <button type="button" class="modal-action-btn danger" id="resetAllBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          Resetar Todo o Progresso
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
